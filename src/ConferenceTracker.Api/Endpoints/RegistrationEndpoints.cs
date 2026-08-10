@@ -48,7 +48,6 @@ public static class RegistrationEndpoints
                 return TypedResults.Conflict("Attendee is already registered for this session.");
 
             // The business rule worth demoing: a session cannot outgrow its room.
-            // Deliberately naive — two concurrent requests could both pass this check.
             var confirmed = await db.Registrations
                 .CountAsync(r => r.SessionId == sessionId && r.Status == RegistrationStatus.Confirmed);
 
