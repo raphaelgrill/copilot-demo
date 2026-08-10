@@ -1,0 +1,43 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+*.binlog
+
+# Test / coverage output
+[Tt]est[Rr]esults/
+*.coverage
+*.trx
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# User-specific project files
+*.user
+*.suo
+*.rsuser
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# IDEs
+.vs/
+.idea/
+.vscode/
+*.swp
+
+# Local configuration and secrets — appsettings.Development.json is committed
+# on purpose (it only points at the local docker-compose database).
+*.env
+.env
+**/appsettings.*.local.json
+secrets.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# OS noise
+.DS_Store
+Thumbs.db

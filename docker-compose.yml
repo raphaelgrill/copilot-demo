@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: conference-db
+    environment:
+      POSTGRES_DB: conference
+      POSTGRES_USER: conference
+      POSTGRES_PASSWORD: conference
+    ports:
+      - "5433:5432"
+    volumes:
+      - conference-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conference -d conference"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  conference-pgdata:
