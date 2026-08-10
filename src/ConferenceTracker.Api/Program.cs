@@ -42,3 +42,7 @@ app.MapAttendeeEndpoints();
 app.MapRegistrationEndpoints();
 
 app.Run();
+
+// Top-level statements generate an internal Program class; the integration tests need
+// WebApplicationFactory<Program> to see it.
+public partial class Program;

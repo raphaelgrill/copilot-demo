@@ -17,6 +17,24 @@ The raw OpenAPI document is at `/openapi/v1.json`.
 
 To reset everything: `docker compose down -v` and run again.
 
+## Tests
+
+```bash
+dotnet test
+```
+
+Integration tests run the real API through `WebApplicationFactory` against a throwaway Postgres 17
+container started by [Testcontainers](https://dotnet.testcontainers.org/), so **Docker has to be
+running** — but nothing else needs setting up, and `docker compose up` is not required. Each test
+class gets its own freshly migrated and seeded database, so the deterministic seed ids above stay
+valid.
+
+`RegistrationCapacityTests` covers the capacity rule: the last seat, the 409 when the room is full,
+freeing a seat by cancelling, and re-registering onto the reused row.
+
+CI runs the same `dotnet test` on every push to `main` and every pull request
+(`.github/workflows/ci.yml`).
+
 ## Model
 
 ```
