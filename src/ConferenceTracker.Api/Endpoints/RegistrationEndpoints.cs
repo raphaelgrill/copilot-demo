@@ -52,7 +52,9 @@ public static class RegistrationEndpoints
             var confirmed = await db.Registrations
                 .CountAsync(r => r.SessionId == sessionId && r.Status == RegistrationStatus.Confirmed);
 
-            if (confirmed >= session.Room.Capacity)
+            var seatsLeft = session.Room.Capacity - confirmed;
+
+            if (seatsLeft <= 0)
                 return TypedResults.Conflict($"Session is full ({session.Room.Capacity} seats in {session.Room.Name}).");
 
             if (existing is null)
