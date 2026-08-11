@@ -94,5 +94,25 @@ public static class RegistrationEndpoints
             return TypedResults.NoContent();
         })
             .WithSummary("Cancel a registration and free the seat");
+
+        group.MapPost("/{attendeeId:guid}/cancel", async Task<Results<Ok<RegistrationResponse>, NotFound<string>, Conflict<string>>> (
+            Guid sessionId, Guid attendeeId, ConferenceDbContext db) =>
+        {
+            var registration = await db.Registrations
+                .FirstOrDefaultAsync(r => r.SessionId == sessionId && r.AttendeeId == attendeeId);
+
+            if (registration is null)
+                return TypedResults.NotFound($"Attendee {attendeeId} is not registered for session {sessionId}.");
+
+            if (registration.Status == RegistrationStatus.Cancelled)
+                return TypedResults.Conflict("Registration is already cancelled.");
+
+            registration.Status = RegistrationStatus.Cancelled;
+            await db.SaveChangesAsync();
+
+            return TypedResults.Ok(new RegistrationResponse(
+                registration.SessionId, registration.AttendeeId, registration.RegisteredAt, registration.Status));
+        })
+            .WithSummary("Cancel a registration and return its new state (409 when already cancelled)");
     }
 }

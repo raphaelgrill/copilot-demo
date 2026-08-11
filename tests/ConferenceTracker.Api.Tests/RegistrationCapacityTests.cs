@@ -136,10 +136,52 @@ public sealed class RegistrationCapacityTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Cancel_endpoint_frees_the_seat_and_returns_the_cancelled_registration()
+    {
+        await RegisterAsync(AttendeeEight);
+
+        var response = await CancelAsync(AttendeeEight);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var cancelled = await ReadAsync<RegistrationResponse>(response);
+        Assert.Equal(FiresideSession, cancelled.SessionId);
+        Assert.Equal(AttendeeEight, cancelled.AttendeeId);
+        Assert.Equal(RegistrationStatus.Cancelled, cancelled.Status);
+
+        Assert.Equal(1, (await GetSessionAsync()).SeatsLeft);
+        Assert.Equal(HttpStatusCode.Created, (await RegisterAsync(AttendeeNine)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Cancelling_an_already_cancelled_registration_is_rejected()
+    {
+        await RegisterAsync(AttendeeEight);
+        Assert.Equal(HttpStatusCode.OK, (await CancelAsync(AttendeeEight)).StatusCode);
+
+        var response = await CancelAsync(AttendeeEight);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Contains("already cancelled", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Cancelling_an_unknown_registration_returns_not_found()
+    {
+        var response = await CancelAsync(AttendeeNine);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private Task<HttpResponseMessage> RegisterAsync(Guid attendeeId) =>
         _client.PostAsJsonAsync(
             $"/api/sessions/{FiresideSession}/registrations",
             new CreateRegistrationRequest(attendeeId));
+
+    private Task<HttpResponseMessage> CancelAsync(Guid attendeeId) =>
+        _client.PostAsync(
+            $"/api/sessions/{FiresideSession}/registrations/{attendeeId}/cancel", null);
 
     private async Task<SessionDetailResponse> GetSessionAsync()
     {

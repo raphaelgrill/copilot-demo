@@ -83,6 +83,9 @@ curl -s -X DELETE $B/api/sessions/$S/registrations/$A8       # 204, seat freed
 curl -s -X POST $B/api/sessions/$S/registrations \
      -H 'Content-Type: application/json' -d "{\"attendeeId\":\"$A8\"}"   # 201, reuses the existing row
 
+curl -s -X POST $B/api/sessions/$S/registrations/$A8/cancel  # 200, status: "Cancelled"
+curl -s -X POST $B/api/sessions/$S/registrations/$A8/cancel  # 409 "already cancelled"
+
 curl -s "$B/api/sessions?level=Advanced"                     # filtered listing
 curl -s $B/api/attendees/0d000000-0000-0000-0000-000000000001/agenda
 ```
@@ -107,6 +110,7 @@ docker compose exec db psql -U conference -d conference -c 'select "Title","Leve
 | GET | `/api/attendees/{id}/agenda` |
 | GET, POST | `/api/sessions/{sessionId}/registrations` |
 | DELETE | `/api/sessions/{sessionId}/registrations/{attendeeId}` |
+| POST | `/api/sessions/{sessionId}/registrations/{attendeeId}/cancel` — 200 with the cancelled registration, 409 when it was already cancelled |
 
 ## Notes
 
