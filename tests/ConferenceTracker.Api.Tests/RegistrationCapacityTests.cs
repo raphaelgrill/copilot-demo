@@ -157,8 +157,6 @@ public sealed class RegistrationCapacityTests : IAsyncLifetime
 
     private static async Task<T> ReadAsync<T>(HttpResponseMessage response)
     {
-
-        
         var payload = await response.Content.ReadFromJsonAsync<T>(Json);
         Assert.NotNull(payload);
         return payload;
