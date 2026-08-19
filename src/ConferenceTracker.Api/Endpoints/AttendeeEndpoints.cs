@@ -62,5 +62,22 @@ public static class AttendeeEndpoints
             return TypedResults.Ok(agenda);
         })
             .WithSummary("Get an attendee's confirmed sessions in start order");
+
+        group.MapGet("/{id:guid}/registrations", async Task<Results<Ok<List<Registration>>, NotFound>> (
+            Guid id, ConferenceDbContext db) =>
+        {
+            var attendee = await db.Attendees.FirstOrDefaultAsync(a => a.Id == id);
+            if (attendee is null) return TypedResults.NotFound();
+
+            var registrations = await db.Registrations
+                .Include(r => r.Session)
+                .ThenInclude(s => s.Room)
+                .Where(r => r.AttendeeId == id)
+                .OrderByDescending(r => r.RegisteredAt)
+                .ToListAsync();
+
+            return TypedResults.Ok(registrations);
+        })
+            .WithSummary("List every registration of an attendee, cancelled ones included");
     }
 }
